@@ -11,7 +11,7 @@
 		public function Main() {
 			// constructor code
 			//var values:Array = ["0", "1", "2", "3"];
-			var values:Array = ["", "H", "X", "C"];
+			var values:Array = ["I", "H", "X", "C"];
 			var rs:CP_RollingScroller = new CP_RollingScroller(values);
 			this.addChild(rs);
 			rs.x = 135;

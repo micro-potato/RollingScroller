@@ -6,12 +6,13 @@
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	import flash.geom.Point;
 	
 	
 	public class CP_RollingScroller extends MovieClip {
 		
 		private var _values:Array = new Array();
-		private var _activeValue:String = "";
+		private var _activeValue:String = "I";
 		private var _inputValues:Array = new Array();
 		private var _inputHeight:int = 0;
 		private var _centerIndex:int = 0;
@@ -104,12 +105,24 @@
 			_dragSprite.removeEventListener(MouseEvent.MOUSE_DOWN, OnMouseDown);
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, OnMouseMove);
 			stage.addEventListener(MouseEvent.MOUSE_UP, OnMouseUp);
+			stage.addEventListener(MouseEvent.MOUSE_OUT, OnMouseOut);
 		}
 		
 		function OnMouseUp(e:Event):void 
 		{
 			stage.removeEventListener(MouseEvent.MOUSE_UP, OnMouseUp);
 			stage.removeEventListener(MouseEvent.MOUSE_MOVE, OnMouseMove);
+			stage.removeEventListener(MouseEvent.MOUSE_OUT, OnMouseOut);
+			_dragSprite.addEventListener(MouseEvent.MOUSE_DOWN, OnMouseDown);
+			CorrectionScrollResult();
+		}
+		
+		function OnMouseOut(e:Event):void 
+		{
+			trace("out");
+			stage.removeEventListener(MouseEvent.MOUSE_UP, OnMouseUp);
+			stage.removeEventListener(MouseEvent.MOUSE_MOVE, OnMouseMove);
+			stage.removeEventListener(MouseEvent.MOUSE_OUT, OnMouseOut);
 			_dragSprite.addEventListener(MouseEvent.MOUSE_DOWN, OnMouseDown);
 			CorrectionScrollResult();
 		}
@@ -146,8 +159,30 @@
 		
 		function CorrectionScrollResult():void 
 		{
+			//var dIndex:int = Math.round(_inputSprite.y / _inputHeight);
+			//_inputSprite.y = dIndex * _inputHeight;
+			//trace("move to:" + _inputSprite.y);
+			//var valueIndex:int = _centerIndex - dIndex;
+			//_activeValue = _inputValues[valueIndex];
+			////trace("valueIndex:"+valueIndex+",get value:" + _activeValue);
+			
+			//new
 			var dIndex:int = Math.round(_inputSprite.y / _inputHeight);
-			_inputSprite.y = dIndex * _inputHeight;
+			var targetY:int = dIndex * _inputHeight;
+			//_inputSprite.y = dIndex * _inputHeight;
+			
+			var targetYtoStage:int = localToGlobal(new Point(_inputSprite.x, targetY)).y;
+			trace("StageY:" + targetYtoStage);
+			if (targetYtoStage >= stage.height)
+			{
+				targetY = globalToLocal(new Point(_inputSprite.x, stage.height-_inputSprite.height)).y;
+			}
+			else if (targetYtoStage <= 0)
+			{
+				targetY = globalToLocal(new Point(_inputSprite.x, 0+_inputSprite.height)).y;
+			}
+			_inputSprite.y = targetY;
+			trace("move to:" + _inputSprite.y);
 			var valueIndex:int = _centerIndex - dIndex;
 			_activeValue = _inputValues[valueIndex];
 			//trace("valueIndex:"+valueIndex+",get value:" + _activeValue);
